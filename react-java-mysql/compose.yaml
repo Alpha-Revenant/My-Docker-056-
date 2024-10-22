@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: node:16-alpine
+    container_name: frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm start"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://backend:5000
+
+  backend:
+    image: python:3.9-slim
+    container_name: backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    command: sh -c "pip install -r requirements.txt && python app.py"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
+
+  db:
+    image: postgres:13-alpine
+    container_name: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+
